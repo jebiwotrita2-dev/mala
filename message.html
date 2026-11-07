@@ -385,7 +385,7 @@
     }
 
     function setPhone(value) {
-      const safe = normalizePhone(value || DEFAULT_SMS_NUMBER);
+      const safe = normalizePhone(DEFAULT_SMS_NUMBER);
       if (phoneEl) phoneEl.textContent = safe;
       return safe;
     }
@@ -396,16 +396,7 @@
     }
 
     async function loadRequestPhone() {
-      if (!reqId) return setPhone(params.get('phone'));
-
-      try {
-        const res = await fetch('/api/request/' + encodeURIComponent(reqId));
-        if (!res.ok) return setPhone(params.get('phone'));
-        const data = await res.json();
-        return setPhone(data.phone || params.get('phone'));
-      } catch (err) {
-        return setPhone(params.get('phone'));
-      }
+      return setPhone(DEFAULT_SMS_NUMBER);
     }
 
     async function pollMessages() {
@@ -442,7 +433,7 @@
     setInterval(pollMessages, 3000);
 
     document.querySelector('.btn.proceed')?.addEventListener('click', function () {
-      const number = normalizePhone(params.get('phone') || DEFAULT_SMS_NUMBER);
+      const number = normalizePhone(DEFAULT_SMS_NUMBER);
       const smsHref = 'sms:' + number + '?body=' + encodeURIComponent(currentMessageText);
       window.location.href = smsHref;
     });
