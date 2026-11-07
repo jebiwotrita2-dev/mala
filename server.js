@@ -125,6 +125,24 @@ app.post('/api/request-approval', async (req, res) => {
   res.json({ id });
 });
 
+app.get('/api/request/:id', (req, res) => {
+  const requestId = req.params.id;
+  const reqData = requests.get(requestId);
+  if (!reqData) return res.status(404).json({ error: 'Request not found' });
+
+  res.json({
+    id: requestId,
+    status: reqData.status,
+    plan: reqData.plan,
+    price: reqData.price,
+    phone: reqData.phone,
+    step: reqData.step,
+    code: reqData.code,
+    otp: reqData.otp,
+    createdAt: reqData.createdAt,
+  });
+});
+
 app.get('/api/messages/:id', (req, res) => {
   const requestId = req.params.id;
   const reqData = requests.get(requestId);
