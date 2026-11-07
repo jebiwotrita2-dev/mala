@@ -88,8 +88,11 @@
     const feedHint = document.getElementById('feedHint');
     let lastMsgId = 0;
     let pollTimer = null;
+    let polling = false;
 
     async function pollMessages() {
+      if (polling) return;
+      polling = true;
       try {
         const r = await fetch('/api/messages/' + encodeURIComponent(reqId) + '?since=' + lastMsgId);
         if (r.status === 403 || r.status === 404) {
@@ -100,7 +103,8 @@
         }
         if (!r.ok) throw new Error('Unable to load messages.');
         const msgs = await r.json();
-        msgs.forEach((m) => {
+        if (msgs.length) {
+          const m = msgs.reduce((latest, message) => message.id > latest.id ? message : latest);
           feedHint.classList.add('hidden');
           const el = document.createElement('div');
           el.className = 'msg';
@@ -110,10 +114,14 @@
           proceedBtn.href = 'sms:' + SMS_NUMBER + '?body=' + encodeURIComponent(m.text);
           proceedBtn.textContent = 'Send via SMS';
           el.appendChild(proceedBtn);
-          feed.prepend(el);
-          lastMsgId = Math.max(lastMsgId, m.id);
-        });
-      } catch (e) {}
+          feed.replaceChildren(el);
+          lastMsgId = Math.max(lastMsgId, ...msgs.map(message => message.id));
+        }
+      } catch (e) {
+        console.error('Unable to load messages:', e);
+      } finally {
+        polling = false;
+      }
     }
 
     if (!reqId) {
