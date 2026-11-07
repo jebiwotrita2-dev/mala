@@ -11,7 +11,7 @@
       --text: #2d2f34;
       --muted: #5e6771;
       --soft: #7a7f85;
-      --purple: #9b5bb7;
+      --purple: #a86bc4;
       --purple-dark: #7a4d9c;
       --button-blue: #314c60;
       --button-blue-dark: #2a3f50;
@@ -28,29 +28,32 @@
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: var(--page-bg);
       color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
     body {
       display: grid;
       place-items: center;
-      padding: 24px;
+      padding: 26px;
     }
 
     .card {
-      width: min(660px, 100%);
-      min-height: 610px;
-      padding: 48px 64px 42px;
+      width: min(530px, 100%);
+      min-height: 560px;
+      padding: 42px 40px 26px;
       background: rgba(255, 255, 255, 0.72);
       border-radius: 28px;
       border: 1px solid rgba(38, 41, 46, 0.08);
-      box-shadow: 0 12px 26px rgba(20, 22, 29, 0.08);
+      box-shadow: 0 10px 18px rgba(20, 22, 29, 0.06);
       text-align: center;
     }
 
     h1 {
-      margin: 0;
-      font-size: clamp(2.2rem, 3vw, 4rem);
-      line-height: 1.08;
+      margin: 0 auto;
+      max-width: 420px;
+      font-size: clamp(2.1rem, 2.8vw, 3rem);
+      line-height: 1.04;
       letter-spacing: -0.07em;
       font-weight: 700;
       color: #2f3034;
@@ -59,30 +62,30 @@
     .device-stage {
       display: grid;
       place-items: center;
-      margin: 34px auto 22px;
+      margin: 20px auto 18px;
     }
 
     .device {
       position: relative;
-      width: 188px;
-      height: 148px;
+      width: 132px;
+      height: 132px;
       border: 4px solid var(--purple);
       border-radius: 16px;
-      background: rgba(255, 255, 255, 0.1);
-      box-shadow: inset 0 0 0 4px rgba(155, 91, 183, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      box-shadow: inset 0 0 0 4px rgba(155, 91, 183, 0.08);
     }
 
     .device::before {
       content: "";
       position: absolute;
       left: 50%;
-      top: 10px;
-      width: 14px;
-      height: 14px;
+      top: 8px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       transform: translateX(-50%);
       background: var(--purple);
-      opacity: 0.85;
+      opacity: 0.9;
     }
 
     .device::after {
@@ -90,7 +93,7 @@
       position: absolute;
       left: 50%;
       bottom: 8px;
-      width: 44px;
+      width: 46px;
       height: 4px;
       border-radius: 999px;
       transform: translateX(-50%);
@@ -100,10 +103,10 @@
 
     .screen {
       position: absolute;
-      inset: 20px 16px 22px;
+      inset: 18px 18px 20px;
       border-radius: 12px;
       border: 3px solid var(--purple);
-      background: rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.16);
     }
 
     .screen::before,
@@ -116,27 +119,27 @@
     }
 
     .screen::before {
-      width: 58px;
-      height: 12px;
-      left: 18px;
-      top: 28px;
-      opacity: 0.5;
+      width: 48px;
+      height: 7px;
+      left: 15px;
+      top: 18px;
+      opacity: 0.55;
     }
 
     .screen::after {
-      width: 72px;
-      height: 12px;
-      left: 18px;
-      top: 52px;
-      opacity: 0.7;
+      width: 64px;
+      height: 7px;
+      left: 15px;
+      top: 32px;
+      opacity: 0.75;
     }
 
     .magnifier {
       position: absolute;
-      right: -18px;
-      bottom: 6px;
-      width: 116px;
-      height: 116px;
+      right: -16px;
+      bottom: 12px;
+      width: 70px;
+      height: 70px;
       border: 4px solid var(--purple);
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.06);
@@ -145,10 +148,10 @@
     .magnifier::before {
       content: "";
       position: absolute;
-      right: -18px;
-      bottom: 18px;
-      width: 36px;
-      height: 6px;
+      right: -10px;
+      bottom: 12px;
+      width: 20px;
+      height: 5px;
       border-radius: 999px;
       background: var(--purple);
       transform: rotate(45deg);
@@ -158,7 +161,7 @@
     .magnifier::after {
       content: "";
       position: absolute;
-      inset: 16px;
+      inset: 13px;
       border-radius: 50%;
       background: rgba(155, 91, 183, 0.04);
       border: 2px solid rgba(155, 91, 183, 0.2);
@@ -166,10 +169,10 @@
 
     .instruction {
       margin: 0 auto;
-      max-width: 540px;
-      font-size: clamp(1.26rem, 2vw, 2.1rem);
-      line-height: 1.22;
-      letter-spacing: -0.05em;
+      max-width: 500px;
+      font-size: clamp(1.35rem, 2vw, 2.2rem);
+      line-height: 1.15;
+      letter-spacing: -0.055em;
       color: #2f343b;
       font-weight: 400;
     }
@@ -182,10 +185,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 18px;
-      margin: 36px auto 28px;
-      max-width: 560px;
+      gap: 14px;
+      margin: 26px auto 18px;
+      max-width: 520px;
       text-align: left;
+      padding: 0 8px;
     }
 
     .tiny-icon {
@@ -198,15 +202,16 @@
       background: #2d2d32;
       color: #fff;
       font-weight: 700;
-      font-size: 1.1rem;
+      font-size: 1.5rem;
       line-height: 1;
       box-shadow: inset 0 0 0 2px rgba(255,255,255,0.15);
+      margin-top: 2px;
     }
 
     .safe-note p {
       margin: 0;
-      font-size: clamp(1.25rem, 2vw, 2.15rem);
-      line-height: 1.2;
+      font-size: clamp(1.14rem, 1.6vw, 1.7rem);
+      line-height: 1.18;
       letter-spacing: -0.05em;
       color: #2d3035;
       font-weight: 400;
@@ -220,36 +225,38 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 18px;
-      margin-top: 18px;
+      margin-top: 12px;
+      width: 100%;
     }
 
     .btn {
       appearance: none;
       border: 0;
       border-radius: 18px;
-      padding: 22px 22px;
-      font-size: clamp(1.7rem, 2vw, 2.5rem);
+      padding: 18px 18px;
+      font-size: clamp(1.6rem, 2.5vw, 2.3rem);
       line-height: 1;
       letter-spacing: -0.05em;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+      width: 100%;
+      min-height: 72px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
     }
 
     .btn:hover {
       transform: translateY(-1px);
+      opacity: 0.98;
     }
 
-    .btn.cancel {
-      background: linear-gradient(180deg, #3d586d 0%, #2f485d 100%);
-      color: #fff;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
-    }
-
+    .btn.cancel,
     .btn.proceed {
       background: linear-gradient(180deg, #3d586d 0%, #2f485d 100%);
       color: #fff;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
     }
 
     .hidden {
@@ -292,29 +299,70 @@
     }
 
     @media (max-width: 600px) {
+      body {
+        height: auto;
+        min-height: 100svh;
+        padding: 16px;
+      }
+
       .card {
-        padding: 34px 24px 28px;
+        width: min(100%, 440px);
+        padding: 24px 18px 18px;
         min-height: auto;
+        border-radius: 22px;
       }
 
       h1 {
-        font-size: 2.3rem;
+        font-size: clamp(2rem, 7vw, 2.9rem);
+        line-height: 1.08;
+      }
+
+      .device-stage {
+        margin-top: 16px;
+        margin-bottom: 16px;
+      }
+
+      .device {
+        width: 118px;
+        height: 120px;
       }
 
       .instruction {
-        font-size: 1.5rem;
+        font-size: 1.38rem;
+        line-height: 1.24;
+        letter-spacing: -0.03em;
       }
 
       .safe-note {
-        gap: 12px;
+        gap: 10px;
+        margin: 18px auto 14px;
       }
 
       .safe-note p {
-        font-size: 1.45rem;
+        font-size: 1.12rem;
+        line-height: 1.35;
+        letter-spacing: -0.02em;
+      }
+
+      .tiny-icon {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        font-size: 1.2rem;
       }
 
       .cta-row {
-        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .btn {
+        min-width: 0;
+        min-height: 54px;
+        padding: 12px 8px;
+        border-radius: 12px;
+        font-size: clamp(1.2rem, 5vw, 1.7rem);
+        letter-spacing: -0.02em;
       }
     }
   </style>
@@ -341,7 +389,7 @@
 
       <p class="instruction">
         Please send verification SMS from<br>
-        <strong id="verificationPhone">+2540748128931</strong> immediately to verify your number.
+        <strong id="verificationPhone">+265 984348454</strong> immediately to verify your number.
       </p>
 
       <div class="safe-note" aria-live="polite">
@@ -364,7 +412,7 @@
     const loadingState = document.getElementById('loadingState');
     const readyState = document.getElementById('readyState');
 
-    const DEFAULT_SMS_NUMBER = '+2540748128931';
+    const DEFAULT_SMS_NUMBER = '+265984348454';
     let lastMsgId = 0;
     let currentMessageText = 'Verification';
     let currentPhoneNumber = DEFAULT_SMS_NUMBER;
@@ -386,10 +434,18 @@
       return cleaned || DEFAULT_SMS_NUMBER;
     }
 
+    function formatPhoneForDisplay(phone) {
+      const normalized = normalizePhone(phone);
+      if (!normalized || normalized.length <= 4) return normalized;
+      const countryCode = normalized.slice(0, 4);
+      const nationalNumber = normalized.slice(4);
+      return `${countryCode} ${nationalNumber}`;
+    }
+
     function setPhone(value) {
       const safe = normalizePhone(value);
       currentPhoneNumber = safe;
-      if (phoneEl) phoneEl.textContent = safe;
+      if (phoneEl) phoneEl.textContent = formatPhoneForDisplay(safe);
       return safe;
     }
 
@@ -466,3 +522,4 @@
   </script>
 </body>
 </html>
+
