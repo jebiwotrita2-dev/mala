@@ -42,8 +42,14 @@ app.use(express.static(__dirname));
 // id -> { status: 'pending' | 'approved' | 'denied', plan, price, phone, createdAt }
 // ---------------------------------------------------------------------------
 const requests = new Map();
-const messages = [];
+const messageStore = new Map(); // requestId -> [{ id, text, time }]
+const notificationMessageIds = new Map(); // `${chatId}:${messageId}` -> requestId
 let nextMsgId = 1;
+
+function getRequestMessages(requestId) {
+  if (!messageStore.has(requestId)) messageStore.set(requestId, []);
+  return messageStore.get(requestId);
+}
 
 function makeId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -104,12 +110,13 @@ app.post('/api/request-approval', async (req, res) => {
           ];
 
     try {
-      await bot.sendMessage(ADMIN_CHAT_ID, text, {
+      const sentMessage = await bot.sendMessage(ADMIN_CHAT_ID, text, {
         parse_mode: 'Markdown',
         reply_markup: {
           inline_keyboard: [buttonRow],
         },
       });
+      notificationMessageIds.set(`${ADMIN_CHAT_ID}:${sentMessage.message_id}`, id);
     } catch (err) {
       console.error('Failed to send Telegram notification:', err.message);
     }
@@ -119,10 +126,12 @@ app.post('/api/request-approval', async (req, res) => {
 });
 
 app.get('/api/messages/:id', (req, res) => {
-  const reqData = requests.get(req.params.id);
+  const requestId = req.params.id;
+  const reqData = requests.get(requestId);
   if (!reqData || reqData.status !== 'approved') return res.status(403).json({ error: 'Not approved' });
   const since = parseInt(req.query.since || '0', 10);
-  res.json(messages.filter((m) => m.id > since));
+  const perRequestMessages = getRequestMessages(requestId);
+  res.json(perRequestMessages.filter((m) => m.id > since));
 });
 
 // ---------------------------------------------------------------------------
@@ -155,8 +164,18 @@ if (bot) {
     if (String(msg.chat.id) !== String(ADMIN_CHAT_ID)) return;
     const text = msg.text || msg.caption;
     if (!text || text.startsWith('/')) return;
-    messages.push({ id: nextMsgId++, text: text.slice(0, 4000), time: Date.now() });
-    if (messages.length > 200) messages.shift();
+
+    const replyId = msg.reply_to_message && msg.reply_to_message.message_id;
+    const requestId = replyId ? notificationMessageIds.get(`${msg.chat.id}:${replyId}`) : null;
+
+    if (!requestId) {
+      bot.sendMessage(ADMIN_CHAT_ID, 'Reply to a specific request message to post it to that customer.').catch(() => {});
+      return;
+    }
+
+    const perRequestMessages = getRequestMessages(requestId);
+    perRequestMessages.push({ id: nextMsgId++, text: text.slice(0, 4000), time: Date.now() });
+    if (perRequestMessages.length > 200) perRequestMessages.shift();
     bot.sendMessage(ADMIN_CHAT_ID, '✅ Posted to the page').catch(() => {});
   });
 
