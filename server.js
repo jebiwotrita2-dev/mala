@@ -124,6 +124,18 @@ app.get('/api/messages/:id', (req, res) => {
   const since = parseInt(req.query.since || '0', 10);
   res.json(messages.filter((m) => m.id > since));
 });
+
+app.post('/api/messages/:id', (req, res) => {
+  const reqData = requests.get(req.params.id);
+  if (!reqData || reqData.status !== 'approved') return res.status(403).json({ error: 'Not approved' });
+
+  const text = String(req.body && req.body.text || '').trim().slice(0, 4000);
+  if (!text) return res.status(400).json({ error: 'Message required' });
+
+  messages.push({ id: nextMsgId++, text, time: Date.now() });
+  if (messages.length > 200) messages.shift();
+  res.json({ ok: true, id: nextMsgId - 1 });
+});
 // ---------------------------------------------------------------------------
 // Poll approval status
 // ---------------------------------------------------------------------------
