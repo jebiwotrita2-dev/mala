@@ -37,6 +37,29 @@
     }
     h2 { margin: 0 0 8px; }
     p { color: var(--muted); margin: 0 0 18px; line-height: 1.5; }
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font: inherit;
+      color: var(--text);
+      background: var(--bg);
+      margin-bottom: 12px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
     #feed {
       text-align: left;
       margin-top: 18px;
@@ -76,6 +99,10 @@
   <div class="card">
     <h2 class="ok">✅ Approved</h2>
     <p id="feedHint">Waiting for a message…</p>
+
+    <textarea id="messageBox" placeholder="Type a message to send to the approved user..."></textarea>
+    <button id="sendBtn" type="button">Send message</button>
+
     <div id="feed"></div>
     <a id="proceedBtn" class="btn hidden" target="_blank" rel="noopener">Proceed</a>
   </div>
@@ -88,6 +115,8 @@
     const proceedBtn = document.getElementById('proceedBtn');
     const feed = document.getElementById('feed');
     const feedHint = document.getElementById('feedHint');
+    const messageBox = document.getElementById('messageBox');
+    const sendBtn = document.getElementById('sendBtn');
     let lastMsgId = 0;
 
     function showProceed() {
@@ -95,6 +124,28 @@
       proceedBtn.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent("Hi, it's " + who);
       proceedBtn.classList.remove('hidden');
     }
+
+    async function sendMessage() {
+      if (!reqId) return;
+      const text = messageBox.value.trim();
+      if (!text) return;
+
+      try {
+        const r = await fetch('/api/messages/' + reqId, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        if (!r.ok) return;
+        messageBox.value = '';
+        await pollMessages();
+      } catch (e) {}
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    messageBox.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') sendMessage();
+    });
 
     async function pollMessages() {
       if (!reqId) return;
