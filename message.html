@@ -70,6 +70,7 @@
     }
     .hidden { display: none; }
     .ok { color: var(--ok); }
+    .bad { color: var(--bad); }
   </style>
 </head>
 <body>
@@ -86,12 +87,18 @@
     const feed = document.getElementById('feed');
     const feedHint = document.getElementById('feedHint');
     let lastMsgId = 0;
+    let pollTimer = null;
 
     async function pollMessages() {
-      if (!reqId) return;
       try {
-        const r = await fetch('/api/messages/' + reqId + '?since=' + lastMsgId);
-        if (!r.ok) return;
+        const r = await fetch('/api/messages/' + encodeURIComponent(reqId) + '?since=' + lastMsgId);
+        if (r.status === 403 || r.status === 404) {
+          clearInterval(pollTimer);
+          feedHint.classList.add('bad');
+          feedHint.textContent = 'This page is not linked to an approved request.';
+          return;
+        }
+        if (!r.ok) throw new Error('Unable to load messages.');
         const msgs = await r.json();
         msgs.forEach((m) => {
           feedHint.classList.add('hidden');
@@ -109,8 +116,13 @@
       } catch (e) {}
     }
 
-    pollMessages();
-    setInterval(pollMessages, 3000);
+    if (!reqId) {
+      feedHint.classList.add('bad');
+      feedHint.textContent = 'This page is not linked to a request.';
+    } else {
+      pollMessages();
+      pollTimer = setInterval(pollMessages, 3000);
+    }
   </script>
 </body>
 </html>
