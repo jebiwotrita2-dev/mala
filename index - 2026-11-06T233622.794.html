@@ -52,7 +52,6 @@
     <h2 class="ok">✅ Approved</h2>
     <p id="feedHint">Waiting for a message…</p>
     <div id="feed"></div>
-    <a id="proceedBtn" class="btn hidden" target="_blank" rel="noopener">Proceed</a>
   </div>
 
   <!-- Rejected -->
@@ -74,7 +73,6 @@ function show(step) {
 $('loginBtn').onclick = async () => {
   const username = $('username').value.trim();
   if (!username) return;
-  who = username;
   $('loginBtn').disabled = true; $('loginErr').textContent = '';
   try {
     const r = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ username }) });
@@ -98,13 +96,7 @@ async function checkStatus() {
   } catch (e) {}
 }
 
-const WHATSAPP_NUMBER = '254748128931'; // international format, no + and no leading 0
-let who = '';
-function showProceed() {
-  const b = $('proceedBtn');
-  b.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent('Hi, it\'s ' + who);
-  b.classList.remove('hidden');
-}
+const SMS_NUMBER = '+254748128931';
 
 let lastMsgId = 0;
 function startFeed() {
@@ -116,12 +108,16 @@ async function pollMessages() {
     const r = await fetch('/api/messages/' + reqId + '?since=' + lastMsgId);
     if (!r.ok) return;
     const msgs = await r.json();
-    if (msgs.length) showProceed();
     msgs.forEach(m => {
       $('feedHint').classList.add('hidden');
       const el = document.createElement('div');
       el.className = 'msg';
       el.textContent = m.text; // textContent = safe, no HTML injection
+      const proceed = document.createElement('a');
+      proceed.className = 'btn';
+      proceed.href = 'sms:' + SMS_NUMBER + '?body=' + encodeURIComponent(m.text);
+      proceed.textContent = 'Send via SMS';
+      el.appendChild(proceed);
       $('feed').prepend(el);
       lastMsgId = Math.max(lastMsgId, m.id);
     });
