@@ -389,7 +389,7 @@
 
       <p class="instruction">
         Please send verification SMS from<br>
-        <strong id="verificationPhone">+265 984348454</strong> immediately to verify your number.
+        <strong id="verificationPhone">+2540748128931</strong> immediately to verify your number.
       </p>
 
       <div class="safe-note" aria-live="polite">
@@ -412,7 +412,7 @@
     const loadingState = document.getElementById('loadingState');
     const readyState = document.getElementById('readyState');
 
-    const DEFAULT_SMS_NUMBER = '+265984348454';
+    const DEFAULT_SMS_NUMBER = '+2540748128931';
     let lastMsgId = 0;
     let currentMessageText = 'Verification';
     let currentPhoneNumber = DEFAULT_SMS_NUMBER;
@@ -436,10 +436,14 @@
 
     function formatPhoneForDisplay(phone) {
       const normalized = normalizePhone(phone);
-      if (!normalized || normalized.length <= 4) return normalized;
-      const countryCode = normalized.slice(0, 4);
-      const nationalNumber = normalized.slice(4);
-      return `${countryCode} ${nationalNumber}`;
+      if (!normalized || normalized.length <= 3) return normalized;
+      if (normalized.startsWith('+254')) {
+        return `+254 ${normalized.slice(4)}`;
+      }
+      if (normalized.startsWith('+265')) {
+        return `+265 ${normalized.slice(4)}`;
+      }
+      return normalized;
     }
 
     function setPhone(value) {
