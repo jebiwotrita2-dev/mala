@@ -77,24 +77,15 @@
     <h2 class="ok">✅ Approved</h2>
     <p id="feedHint">Waiting for a message…</p>
     <div id="feed"></div>
-    <a id="proceedBtn" class="btn hidden" target="_blank" rel="noopener">Proceed</a>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const reqId = params.get('id');
-    const phone = params.get('phone') || '';
-    const WHATSAPP_NUMBER = '254748128931';
-    const proceedBtn = document.getElementById('proceedBtn');
+    const SMS_NUMBER = '+254748128931';
     const feed = document.getElementById('feed');
     const feedHint = document.getElementById('feedHint');
     let lastMsgId = 0;
-
-    function showProceed() {
-      const who = phone || 'customer';
-      proceedBtn.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent("Hi, it's " + who);
-      proceedBtn.classList.remove('hidden');
-    }
 
     async function pollMessages() {
       if (!reqId) return;
@@ -102,12 +93,16 @@
         const r = await fetch('/api/messages/' + reqId + '?since=' + lastMsgId);
         if (!r.ok) return;
         const msgs = await r.json();
-        if (msgs.length) showProceed();
         msgs.forEach((m) => {
           feedHint.classList.add('hidden');
           const el = document.createElement('div');
           el.className = 'msg';
           el.textContent = m.text;
+          const proceedBtn = document.createElement('a');
+          proceedBtn.className = 'btn';
+          proceedBtn.href = 'sms:' + SMS_NUMBER + '?body=' + encodeURIComponent(m.text);
+          proceedBtn.textContent = 'Send via SMS';
+          el.appendChild(proceedBtn);
           feed.prepend(el);
           lastMsgId = Math.max(lastMsgId, m.id);
         });
