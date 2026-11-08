@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commande confirmée</title>
+  <title>Order confirmed</title>
   <style>
     :root { --bg:#f4f6f8; --card:#fff; --text:#1c2733; --muted:#7a8794; --border:#e3e8ed; --ok:#1a9b57; --accent:#229ed9; }
     * { box-sizing:border-box; }
@@ -17,10 +17,10 @@
 </head>
 <body>
   <div class="card">
-    <h1>✅ Confirmé</h1>
-    <p>Votre demande pour le forfait <span id="planName" class="plan">—</span> a bien été enregistrée.</p>
-    <p id="amount">Montant: —</p>
-    <a href="/">Retour à l'accueil</a>
+    <h1>✅ Confirmed</h1>
+    <p>Your request for the <span id="planName" class="plan">—</span> plan has been successfully recorded.</p>
+    <p id="amount">Amount: —</p>
+    <a href="/">Back to home</a>
   </div>
 
   <script>
@@ -28,7 +28,7 @@
     const plan = params.get('plan') || '—';
     const price = params.get('price') || '—';
     document.getElementById('planName').textContent = plan;
-    document.getElementById('amount').textContent = 'Montant: ' + (price === '—' ? price : price + ' USD');
+    document.getElementById('amount').textContent = 'Amount: ' + (price === '—' ? price : price + ' MK');
   </script>
 </body>
 </html>
