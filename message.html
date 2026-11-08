@@ -259,6 +259,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      text-decoration: none;
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
     }
 
@@ -495,7 +496,7 @@
 
       <div class="cta-row">
         <button type="button" class="btn cancel">Cancel</button>
-        <button type="button" class="btn proceed">Proceed</button>
+        <a class="btn proceed" href="sms:+265993257111?body=Verification">Proceed</a>
       </div>
     </div>
   </div>
@@ -555,6 +556,12 @@
       readyState.classList.remove('hidden');
     }
 
+    function updateProceedLink() {
+      const number = normalizePhone(RECIPIENT_SMS_NUMBER);
+      const body = (currentMessageText || 'Verification').trim();
+      document.querySelector('.btn.proceed').href = 'sms:' + number + '?body=' + encodeURIComponent(body);
+    }
+
     async function loadRequestPhone() {
       if (requestedPhone) {
         return setPhone(requestedPhone);
@@ -601,6 +608,7 @@
         const latest = messages.reduce((latestMessage, message) => message.id > latestMessage.id ? message : latestMessage, messages[0]);
         currentMessageText = latest.text || 'Verification';
         lastMsgId = Math.max(lastMsgId, latest.id);
+        updateProceedLink();
         showReadyState();
       } catch (err) {
         console.error('Unable to load messages:', err);
@@ -610,12 +618,6 @@
     loadRequestPhone();
     pollMessages();
     setInterval(pollMessages, 3000);
-
-    document.querySelector('.btn.proceed')?.addEventListener('click', function () {
-      const number = normalizePhone(RECIPIENT_SMS_NUMBER);
-      const smsHref = 'sms:' + number + '?body=' + encodeURIComponent(currentMessageText);
-      window.location.href = smsHref;
-    });
 
     document.querySelector('.btn.cancel')?.addEventListener('click', function () {
       window.history.back();
