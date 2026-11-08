@@ -281,13 +281,11 @@
     }
 
     .airtel-logo {
-      font-size: clamp(3.5rem, 7vw, 6rem);
-      line-height: 0.9;
-      font-weight: 800;
-      letter-spacing: -0.08em;
-      color: #20242b;
+      display: block;
+      width: 180px;
+      max-width: 80%;
+      height: auto;
       margin: 0 0 12px;
-      font-style: italic;
     }
 
     .loading-spinner {
@@ -456,7 +454,7 @@
   <div class="card" role="dialog" aria-modal="true" aria-labelledby="verify-title">
     <div id="loadingState" class="loading-state">
       <div>
-        <div class="airtel-logo" aria-label="Airtel">airtel</div>
+        <img class="airtel-logo" src="assets/img/logo.svg" alt="Airtel">
         <div class="loading-spinner" aria-hidden="true"></div>
         <div class="loading-label">Processing...</div>
         <div class="loading-sub">Please wait, <span>don't leave this page.</span></div>
