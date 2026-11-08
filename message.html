@@ -6,7 +6,7 @@
   <title>Messages</title>
   <style>
     :root {
-      --page-bg: #f2e7e7;
+      --page-bg: #e8e2e1;
       --card-bg: #f7f3f4;
       --text: #1d1f26;
       --muted: #5f6670;
@@ -17,10 +17,10 @@
       --button-blue-dark: #2a3f50;
       --ring: #d7dfe6;
       --shadow: rgba(32, 33, 36, 0.08);
-      --airtel-red: #e73d3d;
-      --airtel-red-deep: #d12027;
-      --airtel-red-soft: #f8d1d1;
-      --airtel-red-pale: #f5e4e5;
+      --airtel-red: #b564c7;
+      --airtel-red-deep: #8d60ab;
+      --airtel-red-soft: #f2e8f6;
+      --airtel-red-pale: #f7f1fa;
     }
 
     * { box-sizing: border-box; }
@@ -58,11 +58,8 @@
     .card::before {
       content: "";
       position: absolute;
-      inset: -14% 0 auto -8%;
-      height: 120px;
-      background: linear-gradient(135deg, var(--airtel-red) 0%, var(--airtel-red-deep) 100%);
-      transform: skewY(-8deg);
-      border-radius: 0 0 40% 0;
+      inset: 0;
+      background: transparent;
       z-index: 0;
     }
 
@@ -295,7 +292,7 @@
       line-height: 0.9;
       font-weight: 800;
       letter-spacing: -0.08em;
-      color: var(--airtel-red);
+      color: #20242b;
       margin: 0 0 12px;
       font-style: italic;
     }
@@ -303,14 +300,14 @@
     .loading-spinner {
       width: 120px;
       height: 120px;
-      border: 10px solid rgba(231, 61, 61, 0.14);
-      border-top-color: var(--airtel-red);
-      border-right-color: rgba(231, 61, 61, 0.8);
+      border: 10px solid rgba(181, 100, 199, 0.15);
+      border-top-color: var(--purple);
+      border-right-color: rgba(181, 100, 199, 0.8);
       border-radius: 50%;
       animation: spin 1.2s linear infinite;
       margin: 0 auto 20px;
       position: relative;
-      box-shadow: inset 0 0 0 1px rgba(231, 61, 61, 0.08);
+      box-shadow: inset 0 0 0 1px rgba(181, 100, 199, 0.08);
     }
 
     .loading-spinner::before {
@@ -318,7 +315,7 @@
       position: absolute;
       inset: 14px;
       border-radius: 50%;
-      border: 10px solid rgba(231, 61, 61, 0.12);
+      border: 10px solid rgba(181, 100, 199, 0.12);
     }
 
     .loading-label {
@@ -340,7 +337,7 @@
     }
 
     .loading-sub span {
-      color: var(--airtel-red);
+      color: #1c1f25;
       font-weight: 800;
     }
 
@@ -364,16 +361,16 @@
       align-items: center;
       justify-content: center;
       gap: 12px;
-      background: linear-gradient(180deg, #f57d7d 0%, var(--airtel-red) 100%);
-      color: #fff;
+      background: rgba(32, 36, 43, 0.06);
+      color: #2a2d35;
       border-radius: 999px;
       padding: 18px 26px;
       font-size: clamp(1.3rem, 2vw, 2rem);
       line-height: 1.2;
       letter-spacing: -0.04em;
       font-weight: 700;
-      box-shadow: 0 8px 16px rgba(231, 61, 61, 0.22);
       max-width: 100%;
+      border: 1px solid rgba(30, 33, 39, 0.08);
     }
 
     .keep-open .info-badge {
