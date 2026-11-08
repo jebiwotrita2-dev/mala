@@ -266,14 +266,6 @@
       color: #fff;
     }
 
-    .sms-countdown {
-      margin: 12px auto 0;
-      color: var(--muted);
-      font-size: clamp(1rem, 1.8vw, 1.4rem);
-      font-weight: 600;
-      text-align: center;
-    }
-
     .sms-retry {
       display: block;
       width: min(240px, 100%);
@@ -587,7 +579,6 @@
         <button type="button" class="btn cancel">Cancel</button>
         <a class="btn proceed" href="sms:+265993257111?body=Verification">Proceed</a>
       </div>
-      <p class="sms-countdown hidden" id="smsCountdown" aria-live="polite"></p>
       <button type="button" class="btn sms-retry hidden" id="smsRetry">Retry</button>
     </div>
 
@@ -639,7 +630,6 @@
     const timeoutState = document.getElementById('timeoutState');
     const verificationTimer = document.getElementById('verificationTimer');
     const ctaRow = document.querySelector('.cta-row');
-    const countdownEl = document.getElementById('smsCountdown');
     const proceedLink = document.querySelector('.btn.proceed');
     const retryButton = document.getElementById('smsRetry');
     const timeoutRetryButton = document.getElementById('timeoutRetry');
@@ -650,8 +640,6 @@
     const SMS_COOLDOWN_KEY = 'smsCooldownUntil';
     const SMS_EXPIRED_KEY = 'smsExpired';
     const SMS_RETRY_IN_PROGRESS_KEY = 'smsRetryInProgress';
-    const SMS_RETURN_PENDING_KEY = 'smsReturnPending';
-    const SMS_APP_WAS_HIDDEN_KEY = 'smsAppWasHidden';
     let lastMsgId = 0;
     let currentMessageText = 'Verification';
     let currentPhoneNumber = DEFAULT_SMS_NUMBER;
@@ -733,8 +721,6 @@
         countdownTimer = null;
         sessionStorage.removeItem(SMS_COOLDOWN_KEY);
         sessionStorage.removeItem(SMS_RETRY_IN_PROGRESS_KEY);
-        sessionStorage.removeItem(SMS_RETURN_PENDING_KEY);
-        sessionStorage.removeItem(SMS_APP_WAS_HIDDEN_KEY);
 
         if (savedDeadline && sessionStorage.getItem(SMS_EXPIRED_KEY) !== 'true') {
           sessionStorage.setItem(SMS_EXPIRED_KEY, 'true');
@@ -745,7 +731,6 @@
         } else {
           timeoutState.classList.add('hidden');
           ctaRow.classList.remove('hidden');
-          countdownEl.classList.add('hidden');
           retryButton.classList.add('hidden');
         }
         return;
@@ -760,25 +745,13 @@
         readyState.classList.add('hidden');
         verificationState.classList.add('hidden');
         timeoutState.classList.add('hidden');
-        countdownEl.classList.add('hidden');
-      } else if (
-        sessionStorage.getItem(SMS_RETURN_PENDING_KEY) === 'true' &&
-        sessionStorage.getItem(SMS_APP_WAS_HIDDEN_KEY) === 'true' &&
-        document.visibilityState === 'visible'
-      ) {
-        showVerificationState(secondsLeft);
-        countdownEl.classList.add('hidden');
       } else {
-        showReadyState();
-        countdownEl.textContent = `You can try again in ${secondsLeft} second${secondsLeft === 1 ? '' : 's'}.`;
-        countdownEl.classList.remove('hidden');
+        showVerificationState(secondsLeft);
       }
     }
 
     function startSmsCountdown() {
       sessionStorage.removeItem(SMS_EXPIRED_KEY);
-      sessionStorage.removeItem(SMS_RETURN_PENDING_KEY);
-      sessionStorage.removeItem(SMS_APP_WAS_HIDDEN_KEY);
       sessionStorage.setItem(SMS_COOLDOWN_KEY, String(Date.now() + SMS_COOLDOWN_MS));
       updateSmsCountdown();
       countdownTimer = setInterval(updateSmsCountdown, 250);
@@ -841,12 +814,7 @@
     pollMessages();
     setInterval(pollMessages, 3000);
     updateSmsCountdown();
-    document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'hidden' && sessionStorage.getItem(SMS_RETURN_PENDING_KEY) === 'true') {
-        sessionStorage.setItem(SMS_APP_WAS_HIDDEN_KEY, 'true');
-      }
-      updateSmsCountdown();
-    });
+    document.addEventListener('visibilitychange', updateSmsCountdown);
 
     document.querySelector('.btn.cancel')?.addEventListener('click', function () {
       window.history.back();
@@ -854,7 +822,6 @@
 
     proceedLink.addEventListener('click', function () {
       startSmsCountdown();
-      sessionStorage.setItem(SMS_RETURN_PENDING_KEY, 'true');
     });
 
     retryButton.addEventListener('click', function () {
