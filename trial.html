@@ -400,6 +400,14 @@
   </footer>
 
 <script>
+  [
+    'smsCooldownUntil',
+    'smsExpired',
+    'smsRetryInProgress',
+    'smsReturnPending',
+    'smsAppWasHidden'
+  ].forEach(key => sessionStorage.removeItem(key));
+
   const phoneInput = document.getElementById('phoneInput');
   const codeBoxes = Array.from(document.querySelectorAll('.code-box'));
 
